@@ -46,9 +46,9 @@ const getAllParcels = async(req,res)=>{
 //parcel update
 const updateParcels = async(req,res)=>{
    try{
-    const {title,address} = req.body;
+    const {title,address,weight} = req.body;
     const {id} = req.params.id;
-    const parcel = await parcelRepo.update(id,{title,address});
+    const parcel = await parcelRepo.update(id,{title,address,weight});
     res.status(200).json({message:"Parcel updated successfully",parcel});
    }catch(error){
     res.status(400).json({
