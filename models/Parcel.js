@@ -6,6 +6,7 @@ const parcelSchema = new mongoose.Schema({
     ref:"User"},
     title:{type:String},
     status:{type:String, default:"pending"},
-    address:{type:String}
+    address:{type:String},
+    weight:{type:String}
 },{timestamps:true});
 module.exports = mongoose.model("Parcel",parcelSchema);

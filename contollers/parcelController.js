@@ -9,7 +9,7 @@ const parcelRepo = require('../repository/parcelRepository.js');
 //create parcel
 const createParcel = async(req,res)=>{
     try{
-        const{title,address,userId} = req.body;
+        const{title,address,userId,weight} = req.body;
         //check existing parcel
         const existingParcel = await parcelRepo.getUser(userId);
         if(existingParcel && existingParcel.title===title && existingParcel.address===address){
@@ -19,7 +19,7 @@ const createParcel = async(req,res)=>{
         }
 
         //create parcel
-       const parcel = await parcelRepo.create({title,address,userId});
+       const parcel = await parcelRepo.create({title,address,userId,weight});
        res.status(200).json({
         message:`parcel is successfully created , info:${parcel}`
        });
