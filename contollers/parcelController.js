@@ -47,7 +47,7 @@ const getAllParcels = async(req,res)=>{
 const updateParcels = async(req,res)=>{
    try{
     const {title,address,weight} = req.body;
-    const {id} = req.params.id;
+    const id = req.params.id;
     const parcel = await parcelRepo.update(id,{title,address,weight});
     res.status(200).json({message:"Parcel updated successfully",parcel});
    }catch(error){
@@ -60,7 +60,7 @@ const updateParcels = async(req,res)=>{
 //delete or remove parcel
 const deleteParcels = async(req,res)=>{
     try{
-        const {id} = req.params.id;
+        const id = req.params.id;
         const parcel = await parcelRepo.remove(id);
         res.status(200).json({message:"parcel deleted successfully"});
     }catch(error){
