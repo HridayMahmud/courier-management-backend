@@ -11,11 +11,11 @@ const Parcel = require('../models/Parcel.js');
     const getAll = async()=>{
         return Parcel.find();
     }
-    const update = async(id,data)=>{
-        return Parcel.findByIdAndUpdate(id,data,{new:true});
+    const update = async(_id,data)=>{
+        return Parcel.findByIdAndUpdate({_id},data,{new:true});
     }
-    const remove = async(id)=>{
-        return Parcel.findByIdAndDelete(id);
+    const remove = async(_id)=>{
+        return Parcel.findByIdAndDelete({_id});
     }
     // getUser:(userId)=>Parcel.findOne({userId:userId}),
     // getAll:()=>Parcel.find(),
