@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 // const role = require('../middleware/roleMiddleware');
 const mailTransport = require('../config/mail.js');
 const crypto = require('crypto');
+const { waitForDebugger } = require('inspector');
 
 //user registration
 const registration = async(req,res)=>{
@@ -57,6 +58,23 @@ const login = async(req,res)=>{
         return res.status(403).json({message:error.message});
     }
 }
+
+// const updateUser = async(req,res)=>{
+//     try{
+//         const {name,email,role,password} = req.body;
+      
+//         const existUser = await userRepo.findUser(email);
+//         if(!existUser){
+//             return res.status(404).json({message:"User Not Found"});
+//         }
+//         const token = crypto.randomBytes(20).toString("hex");
+//         const user = await userRepo.update(user._id,{name,password,role,resetToken:token});
+//         res.json(user)
+        
+//     }catch(error){
+
+//     }
+// }
 
 //forgot password
 const forgotPassword = async(req,res)=>{

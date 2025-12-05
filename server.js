@@ -1,21 +1,20 @@
 const express = require('express');
+const userRoutes = require('./routes/authRouter.js');
+const parcelRoutes = require('./routes/parcelsRouter.js');
 const db_connection = require('./config/db.js');
-const { i18nMiddleware, i18next } = require('./i18n/i18n.js');
+// const { i18nMiddleware, i18next } = require('./i18n/i18n.js');
 const cors = require('cors');
 const app = express();
 require('dotenv').config();
+
+
+//middleware to parse json
 app.use(cors());
-app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+// app.use(i18nMiddleware.handle(i18next));
 
-
-app.use(i18nMiddleware.handle(i18next));
-const userRoutes = require('./routes/authRouter.js');
-const parcelRoutes = require('./routes/parcelsRouter.js');
-const { connection } = require('mongoose');
-
-
-
+//routes
 app.use("/api/auth", userRoutes);
 app.use("/api/parcel", parcelRoutes);
 
