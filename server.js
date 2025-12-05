@@ -15,6 +15,9 @@ app.use(express.urlencoded({ extended: true }));
 // app.use(i18nMiddleware.handle(i18next));
 
 //routes
+app.get("/",(req,res)=>{
+    res.send("api working");
+});
 app.use("/api/auth", userRoutes);
 app.use("/api/parcel", parcelRoutes);
 
