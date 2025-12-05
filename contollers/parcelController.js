@@ -34,7 +34,7 @@ const createParcel = async(req,res)=>{
 
 const getMyParcel = async(req,res)=>{
     const parcel = await parcelRepo.getUser(req.user.id);
-    res.json(parcel.name,user.role,parcel);
+    res.json(parcel);
 }
 
 //get all parcels
