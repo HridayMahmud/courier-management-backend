@@ -165,7 +165,7 @@ Authorization: Bearer <TOKEN>
 | ------ | ---------------------       | ---------------------- | ------------------- |
 | POST   | `/api/parcel/create`        | customer/courier/admin | Create parcel       |
 | GET    | `/api/parcel/user-parcel`   | logged-in user         | Get only my parcels |
-| GET    | `/api/parcel/all-parcel`    | admin                  | Get all parcels     |
+| GET    | `/api/parcel/getall-parcel`    | admin                  | Get all parcels     |
 | PUT    | `/api/parcel/update/:id`    | logged-in user         | Update parcel       |
 | DELETE | `/api/parcel/update/:id`    | logged-in user         | Delete parcel       |
 
