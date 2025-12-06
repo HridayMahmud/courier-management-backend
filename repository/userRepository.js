@@ -1,3 +1,4 @@
+const { emit } = require('../models/Parcel.js');
 const User = require('../models/User.js');
 
 // module.exports = {
@@ -18,4 +19,13 @@ const update = async(id,data)=>{
 
     return User.findByIdAndUpdate(id,data,{new:true});
 }
-module.exports = {create,findUser,update}
+// Example in userRepo.js
+const saveResetToken = async (email, token) => {
+    return User.findOneAndUpdate(
+        { email },
+        { resetToken: token },
+        { new: true }
+    );
+};
+
+module.exports = {create,findUser,update,saveResetToken}

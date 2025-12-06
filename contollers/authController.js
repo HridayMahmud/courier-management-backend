@@ -89,9 +89,9 @@ const forgotPassword = async(req,res)=>{
             });
         }
         // const token = crypto.randomBytes(20).toString("hex");
-        const ResetToken = Math.floor(100000 + Math.random * 900000).toString();
+        const resetToken = Math.floor(100000 + Math.random * 900000).toString();
         //Save resetToken to your database
-        await userRepo.saveResetTOken(email,ResetToken);
+        await userRepo.saveResetToken(email,resetToken);
         // await userRepo.update(user._id,{resetToken : token});
         // // const resetLink = `http://localhost:${5000}/reset-password?email=${encodeURIComponent(user.email)}&token=${token}`
         // await mailTransport.sendMail({
