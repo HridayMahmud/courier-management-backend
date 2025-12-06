@@ -61,22 +61,7 @@ const login = async(req,res)=>{
     }
 }
 
-// const updateUser = async(req,res)=>{
-//     try{
-//         const {name,email,role,password} = req.body;
-      
-//         const existUser = await userRepo.findUser(email);
-//         if(!existUser){
-//             return res.status(404).json({message:"User Not Found"});
-//         }
-//         const token = crypto.randomBytes(20).toString("hex");
-//         const user = await userRepo.update(user._id,{name,password,role,resetToken:token});
-//         res.json(user)
-        
-//     }catch(error){
 
-//     }
-// }
 
 //forgot password
 const forgotPassword = async(req,res)=>{
@@ -107,7 +92,7 @@ const forgotPassword = async(req,res)=>{
             subject: "password reset request",
             html: `<h1>your token to reset password</h1>
             <p>User this token to reset password</p>
-            <h2>your resetToken is : ${ResetToken}
+            <h2>your resetToken is : ${resetToken}
             <p>It will expire within 10 minutes</p>
             `
         })
