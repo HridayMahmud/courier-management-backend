@@ -1,8 +1,10 @@
 const userRepo = require('../repository/userRepository.js');
+require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-// const role = require('../middleware/roleMiddleware');
-const mailTransport = require('../config/mail.js');
+const {Resend} = require('resend');
+// const mailTransport = require('../config/mail.js');
+const resend = new Resend(process.env.RESEND_API_KEY);
 const crypto = require('crypto');
 const { waitForDebugger } = require('inspector');
 
@@ -86,15 +88,29 @@ const forgotPassword = async(req,res)=>{
                 message:"User NOT Found"
             });
         }
-        const token = crypto.randomBytes(20).toString("hex");
-        await userRepo.update(user._id,{resetToken : token});
-        // const resetLink = `http://localhost:${5000}/reset-password?email=${encodeURIComponent(user.email)}&token=${token}`
-        await mailTransport.sendMail({
-            to:user.email,
-            subject:"password reset",
-            html:`<p>please collect your reset token:${token}</p>
+        // const token = crypto.randomBytes(20).toString("hex");
+        const ResetToken = Math.floor(100000 + Math.random * 900000).toString();
+        //Save resetToken to your database
+        await userRepo.saveResetTOken(email,ResetToken);
+        // await userRepo.update(user._id,{resetToken : token});
+        // // const resetLink = `http://localhost:${5000}/reset-password?email=${encodeURIComponent(user.email)}&token=${token}`
+        // await mailTransport.sendMail({
+        //     to:user.email,
+        //     subject:"password reset",
+        //     html:`<p>please collect your reset token:${token}</p>
+        //     `
+        // });
+        //send mail to user to reset password
+        await resend.emails.send({
+            from: "no-reply@gmail.com",
+            to: email,
+            subject: "password reset request",
+            html: `<h1>your token to reset password</h1>
+            <p>User this token to reset password</p>
+            <h2>your resetToken is : ${ResetToken}
+            <p>It will expire within 10 minutes</p>
             `
-        });
+        })
         res.json({
             message:"email sent"
         })
@@ -111,14 +127,22 @@ const resetPassword = async (req, res) => {
   try {
     const { email, token, password } = req.body;
 
+
+      // 1. Validate body
+    if (!email || !token || !password) {
+      return res.status(400).json({
+        message: "Email, token & new password are required"
+      });
+    }
     // Find user by email and token
     //here email have to sent as string not object
     const user = await userRepo.findUser(email);
-  
-    if (!user) {
-      return res.status(400).json({ message: "User Not Found" });
+     // 3. Check stored resetToken
+    if (!user.resetToken) {
+      return res.status(400).json({ message: "No reset request found" });
     }
-      if(!user.resetToken == token){
+   
+      if(user.resetToken !== token){
         return res.status(403).json({
             message:"Invalid token"
         });
@@ -132,6 +156,7 @@ const resetPassword = async (req, res) => {
       resetToken: null
     });
 
+   
     res.json({ message: "Password reset successful" });
   } catch (error) {
     res.status(500).json({ message: error.message });

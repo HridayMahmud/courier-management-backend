@@ -13,7 +13,7 @@ const UserSchema = new mongoose.Schema({
     default:"customer"
   },
   resetToken:{
-    type:String
+    type:String,default:null
   }
    
 
