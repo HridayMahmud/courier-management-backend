@@ -3,7 +3,7 @@ require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const {Resend} = require('resend');
-// const mailTransport = require('../config/mail.js');
+const mailTransport = require('../config/mail.js');
 const resend = new Resend(process.env.RESEND_API_KEY);
 const crypto = require('crypto');
 const { waitForDebugger } = require('inspector');
@@ -28,7 +28,7 @@ const registration = async(req,res)=>{
         res.json({
             message:"user regitered successfully",User
         });
-
+        
     }
     catch(error){
         return res.status(400).json({
@@ -73,29 +73,30 @@ const forgotPassword = async(req,res)=>{
                 message:"User NOT Found"
             });
         }
-        // const token = crypto.randomBytes(20).toString("hex");
-        const resetToken = Math.floor(100000 + Math.random()* 900000).toString();
+         const token = crypto.randomBytes(20).toString("hex");
+        // const resetToken = Math.floor(100000 + Math.random()* 900000).toString();
         //Save resetToken to your database
-        await userRepo.saveResetToken(email,resetToken);
-        // await userRepo.update(user._id,{resetToken : token});
-        // // const resetLink = `http://localhost:${5000}/reset-password?email=${encodeURIComponent(user.email)}&token=${token}`
-        // await mailTransport.sendMail({
-        //     to:user.email,
-        //     subject:"password reset",
-        //     html:`<p>please collect your reset token:${token}</p>
-        //     `
-        // });
-        //send mail to user to reset password
-        await resend.emails.send({
-            from: "Courier App <onboarding@resend.dev>",
-            to: email,
-            subject: "password reset request",
-            html: `<h1>your token to reset password</h1>
-            <p>User this token to reset password</p>
-            <h2>your resetToken is : ${resetToken}
-            <p>It will expire within 10 minutes</p>
+        // await userRepo.saveResetToken(email,resetToken);
+        await userRepo.update(user._id,{resetToken : token});
+        // const resetLink = `http://localhost:${5000}/reset-password?email=${encodeURIComponent(user.email)}&token=${token}`
+        await mailTransport.sendMail({
+            to:user.email,
+            subject:"password reset",
+            html:`<p>please collect your reset token:${token}</p>
             `
-        })
+        });
+        //send mail to user to reset password
+    //   const result =  await resend.emails.send({
+    //         from: "Courier App <onboarding@resend.dev>",
+    //         to: user.email,
+    //         subject: "password reset request",
+    //         html: `<h1>your token to reset password</h1>
+    //         <p>User this token to reset password</p>
+    //         <h2>your resetToken is : ${resetToken}
+    //         <p>It will expire within 10 minutes</p>
+    //         `
+    //     });
+  
         res.json({
             message:"email sent"
         })
@@ -111,8 +112,6 @@ const forgotPassword = async(req,res)=>{
 const resetPassword = async (req, res) => {
   try {
     const { email, token, password } = req.body;
-
-
       // 1. Validate body
     if (!email || !token || !password) {
       return res.status(400).json({
@@ -120,13 +119,15 @@ const resetPassword = async (req, res) => {
       });
     }
     // Find user by email and token
-    //here email have to sent as string not object
     const user = await userRepo.findUser(email);
-     // 3. Check stored resetToken
+       //  Check if user exists
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    //  Check if resetToken exists
     if (!user.resetToken) {
       return res.status(400).json({ message: "No reset request found" });
     }
-   
       if(user.resetToken !== token){
         return res.status(403).json({
             message:"Invalid token"
@@ -140,9 +141,8 @@ const resetPassword = async (req, res) => {
       password: hashedPassword,
       resetToken: null
     });
-
-   
     res.json({ message: "Password reset successful" });
+    
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
