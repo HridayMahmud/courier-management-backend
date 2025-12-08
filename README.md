@@ -21,6 +21,7 @@ flowchart TD
     J[Admin Login] --> K[Get All Parcels]
     K --> H
     K --> I
+
 Explanation:
 
 Register User → Create a new user account.
