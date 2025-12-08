@@ -1,257 +1,180 @@
+# 🚚 Courier Management API
 
-This README covers:
-✔ Project overview
-✔ Tech stack
-✔ Features
-✔ Folder structure
-✔ Installation
-✔ Environment variables
-✔ Running the server
-✔ API routes
-✔ Postman/Thunder Client testing guide
-✔ Example requests
-✔ Authentication flows
-✔ Role-based access
-✔ CRUD operations
-✔ Error handling
-✔ Contribution guidelines
-
----
-# 📦 Courier Management Backend
-A Node.js + Express.js + MongoDB backend API for managing courier parcels with authentication, authorization, and role-based access.
----
-## 🚀 Features
-* User Authentication (JWT)
-* Login & Register
-* Role-based access → **customer**, **courier**, **admin**
-* CRUD operations for parcels
-* Get parcels by user
-* Admin-only access for viewing all parcels
-* Secure routes using `authMiddleware`
-* Clean code using MVC pattern
-* Environment variables support using `.env`
-* MongoDB database integration with Mongoose
+A simple RESTful API to manage **users, parcels, and authentication** in a courier system.  
+Base URL: `https://courier-management-backend-swrf.onrender.com`
 
 ---
 
-## 🛠️ Tech Stack
+## 🔹 Features
 
-| Technology                   | Purpose               |
-| ---------------------------- | --------------------- |
-| **Node.js**                  | Runtime environment   |
-| **Express.js**               | Server framework      |
-| **MongoDB + Mongoose**       | Database              |
-| **JWT**                      | Authentication        |
-| **bcryptjs**                 | Password hashing      |
-| **Dotenv**                   | Environment variables |
-| **Postman / Thunder Client** | API testing           |
-
----
-## Project Structure
-
-```text
-.
-├── config/
-│   ├── mail.js
-│   └── db.js
-├── controllers/
-│   ├── authController.js
-│   └── parcelController.js
-├── i18n/
-│   └── i18n.js
-├── middleware/
-│   ├── authMiddleware.js
-│   ├── roleMiddleware.js
-│   └── locallizationMiddleware.js
-├── models/
-│   ├── User.js
-│   └── Parcel.js
-├── node_modules/
-├── repository/
-│   ├── userRepository.js
-│   └── parcelRepository.js
-├── routes/
-│   ├── authRouter.js
-│   └── parcelsRouter.js
-├── views/
-├── .env
-├── .gitignore
-├── package-lock.json
-├── package.json
-└── server.js
-
-## ⚙️ Installation
-Clone the repository:
-```sh
-git clone your-repository-link-here
-cd your-project-folder
-```
-Install dependencies:
-
-```sh
-npm install
-```
+- User registration & login  
+- Forgot password & reset password  
+- Create, view, update, and delete parcels  
+- Admin can view all parcels  
 
 ---
 
-## 🧩 Environment Variables
+## 📝 Endpoints
 
-Create a `.env` file in the root folder:
+### 1️⃣ Register User
 
-```
-PORT=5000
-MONGO_URL=mongodb+srv://root:12345@cluster-1.pfwx280.mongodb.net/courier-management?retryWrites=true&w=majority&appName=Cluster-1
-JWT_SECRET=your_jwt_secret_key
-```
----
-## ▶️ Run the Server
+**POST** `/register`  
 
-```sh
-npm start
-```
-
-OR in development:
-
-```sh
-npm run dev
-```
-
-Server will run at:
-
-```
-http://localhost:5000
-```
-
----
-
-# 🔐 Authentication Routes
-
-| Method | Endpoint                           | Description         |
-| ------ | --------------------               | ------------------- |
-| POST   | `/api/auth/register`               | Register a new user |
-| POST   | `/api/auth/login`                  | Login & get token   |
-| POST   | `/api/auth/forgot-password         | forgot & get token  |
-| POST   | `/api/auth/reset-password          | reset-pasword using token|
-
-### Example register payload:
+**Body:**
 
 ```json
 {
-  "name": "John Doe",
-  "email": "john@gmail.com",
-  "password": "123456"
-  "role":"adming"
+  "name": "HRIDAY MAHMUD",
+  "email": "hriday@example.com",
+  "password": "password123",
+  "role": "customer"
 }
-```
-### Login response:
-
-```json
+Response:
 {
-  "token": "your-jwt-token"
+  "message": "user registered successfully",
+  "User": { /* user object */ }
 }
-```
+2️⃣ Login
 
-Use this token in **Authorization header**:
+POST /login
 
-```
-Authorization: Bearer <TOKEN>
-```
+Body:
 
----
-
-# 📦 Parcel Routes
-
-| Method | Endpoint                    | Access                 | Description         |
-| ------ | ---------------------       | ---------------------- | ------------------- |
-| POST   | `/api/parcel/create`        | customer/courier/admin | Create parcel       |
-| GET    | `/api/parcel/user-parcel`   | logged-in user         | Get only my parcels |
-| GET    | `/api/parcel/getall-parcel`    | admin                  | Get all parcels     |
-| PUT    | `/api/parcel/update/:id`    | logged-in user         | Update parcel       |
-| DELETE | `/api/parcel/update/:id`    | logged-in user         | Delete parcel       |
-
-## ✏️ Sample Create Parcel Request
-
-POST → `/api/parcels/create`
-
-```json
 {
-  "title": "Laptop Delivery",
-  "address": "Dhaka, Bangladesh",
-  "weight": "1.5kg"
+  "email": "hriday@example.com",
+  "password": "password123"
 }
-```
-## 🛠️ Update Parcel Request
-
-PUT → `/api/parcels/6730183hs71`
-
-```json
+Response:
 {
-  "title": "Mobile Delivery",
-  "address": "Mirpur, Dhaka"
+  "message": "login successful",
+  "token": "<JWT_TOKEN>"
 }
-```
+Use this token in Authorization: Bearer <token> header for protected routes.
 
----
+3️⃣ Forgot Password
 
-## ❌ Delete Parcel
+POST /forgot-password
 
-DELETE → `/api/parcels/67301kd812`
+Body:
+
+{
+  "email": "user@example.com"
+}
+Response:
+{
+  "message": "email sent"
+}
+
+4️⃣ Reset Password
+
+POST /reset-password
+
+Body:
+{
+  "email": "user@example.com",
+  "token": "123456",
+  "password": "newpassword123"
+}
+Response:
+
+{
+  "message": "Password reset successful"
+}
+
+5️⃣ Create Parcel
+
+POST /create-parcel
+Headers:
+
+Authorization: Bearer <user_token>
+
+
+Body:
+
+{
+  "title": "Parcel 1",
+  "address": "123 Street, City",
+  "weight": 5
+}
+
 
 Response:
 
-```json
 {
-  "message": "Parcel deleted successfully"
+  "message": "Parcel created successfully",
+  "parcel": { /* parcel object */ }
 }
-```
 
----
+6️⃣ Get User Parcels
 
-# 👮 Role-Based Access
+GET /user-parcel
+Headers:
 
-| Role         | Permissions                                         |
-| ------------ | --------------------------------------------------- |
-| **customer** | Create parcel, update own parcel, delete own parcel |
-| **courier**  | View + update assigned parcels                      |
-| **admin**    | Full access + get all parcels                       |
+Authorization: Bearer <user_token>
 
-Middleware used:
 
-```js
-role(["admin"])
-```
+Response:
 
-```js
-role(["customer", "courier"])
-```
+[
+  { /* parcel object */ },
+  ...
+]
 
----
+7️⃣ Get All Parcels (Admin Only)
 
-## 🧪 Testing Guide (Postman / Thunder Client)
+GET /getall-parcels
+Headers:
 
-### Step 1 → Register
+Authorization: Bearer <admin_token>
 
-### Step 2 → Login
+8️⃣ Update Parcel
 
-### Step 3 → Copy JWT token
+PUT /update/:parcelId
+Headers:
 
-### Step 4 → Set Header:
-
-```
 Authorization: Bearer <token>
-```
 
-### Step 5 → Test any Parcel API
 
----
+Body:
 
-# 🐛 Error Handling Structure
-
-Example error response:
-
-```json
 {
-  "message": "invalid_token"
+  "title": "Updated Parcel",
+  "address": "456 Street, City",
+  "weight": 6
 }
-```
-Tell me what you prefer!
+
+9️⃣ Delete Parcel
+
+DELETE /delete/:parcelId
+Headers:
+
+Authorization: Bearer <token>
+
+🔑 Authorization
+Role	Permissions
+Customer	Create parcel, view own parcels, reset password
+Admin	View all parcels, update/delete any parcel
+
+All protected routes require a JWT token in Authorization header.
+
+⚡ Testing
+
+Use Postman or Insomnia.
+
+Register a user → login → copy the token.
+
+Include the token in Authorization for protected endpoints.
+
+Test forgot-password → reset-password workflow using the token sent via email.
+
+📌 Notes
+
+Passwords are hashed in DB.
+
+Reset tokens expire after 10 minutes.
+
+Admin users can manage all parcels; regular users only their own.
+
+Developed by: Hriday Mahmud
+GitHub Repository: [Courier Management Backend](https://github.com/HridayMahmud/courier-management-backend)
+
