@@ -74,7 +74,7 @@ const forgotPassword = async(req,res)=>{
             });
         }
         // const token = crypto.randomBytes(20).toString("hex");
-        const resetToken = Math.floor(100000 + Math.random * 900000).toString();
+        const resetToken = Math.floor(100000 + Math.random()* 900000).toString();
         //Save resetToken to your database
         await userRepo.saveResetToken(email,resetToken);
         // await userRepo.update(user._id,{resetToken : token});
@@ -87,7 +87,7 @@ const forgotPassword = async(req,res)=>{
         // });
         //send mail to user to reset password
         await resend.emails.send({
-            from: "no-reply@gmail.com",
+            from: "Courier App <onboarding@resend.dev>",
             to: email,
             subject: "password reset request",
             html: `<h1>your token to reset password</h1>
