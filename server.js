@@ -1,6 +1,7 @@
 const express = require('express');
 const userRoutes = require('./routes/authRouter.js');
 const parcelRoutes = require('./routes/parcelsRouter.js');
+const adminUserRoutes = require('./routes/userRouter.js');
 const db_connection = require('./config/db.js');
 const { i18nMiddleware, i18next } = require('./i18n/i18n.js');
 const cors = require('cors');
@@ -20,6 +21,7 @@ app.get("/",(req,res)=>{
 });
 app.use("/api/auth", userRoutes);
 app.use("/api/parcel", parcelRoutes);
+app.use("/api/users", adminUserRoutes);
 
 //db connection
 const startServer = async () => {

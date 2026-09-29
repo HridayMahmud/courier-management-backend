@@ -225,6 +225,26 @@ json
 DELETE /delete/:parcelId
 Headers:
 Authorization: Bearer <token>
+🔟 More Endpoints
+All paths start with `/api`. 🔒 = needs `Authorization: Bearer <token>`.
+
+| Method | Path | Who | What |
+|---|---|---|---|
+| GET | /auth/me 🔒 | any user | Logged-in user's profile |
+| GET | /parcel/track/:trackingId | public | Status + timeline (no addresses, names or phone) |
+| GET | /parcel/:id 🔒 | owner, admin, assigned courier | Parcel details |
+| PATCH | /parcel/:id/status 🔒 | admin, assigned courier | Body `{ "status": "in_transit", "note": "..." }`. Couriers can only move forward |
+| PATCH | /parcel/:id/assign 🔒 | admin | Body `{ "courierId": "<id>" }` (`null` unassigns) |
+| PATCH | /parcel/:id/cancel 🔒 | owner | Only while pending. Optional body `{ "reason": "..." }` |
+| GET | /parcel/courier/assigned 🔒 | courier | Parcels assigned to me, optional `?status=` |
+| GET | /parcel/stats 🔒 | admin | Totals, count per status, last 30 days, recent parcels |
+| GET | /parcel/getall-parcels?page=1&limit=10&status=&search= 🔒 | admin | Paginated `{ items, total, page, limit, pages }`. Without query params the plain array is returned as before |
+| GET | /users?role=courier 🔒 | admin | User list (couriers include `activeParcels`) |
+| POST | /users/courier 🔒 | admin | Body `{ "name", "email", "password" }` creates a courier |
+
+Parcel fields: `trackingId` (auto, e.g. `SS-8F3K2Q9P`), `title`, `address` (delivery), `pickupAddress`, `receiverName`, `receiverPhone`, `weight` (number, kg), `status`, `statusHistory`, `assignedCourier`.
+Status flow: `pending → picked_up → in_transit → out_for_delivery → delivered`, or `cancelled`.
+
 🔑 Authorization
 Role	Permissions
 Customer	Create parcel, view own parcels, reset password
@@ -246,7 +266,7 @@ Admin token is required for /getall-parcels.
 📌 Notes
 Passwords are hashed in the database.
 
-Reset tokens expire after 10 minutes.
+Reset tokens expire after 15 minutes and are stored hashed.
 
 Admin users can manage all parcels; regular users can only access their own parcels.
 

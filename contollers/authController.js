@@ -163,4 +163,17 @@ const resetPassword = async (req, res) => {
   }
 };
 
-module.exports = {registration,login,forgotPassword,resetPassword}
+//logged-in user's profile
+const me = async(req,res)=>{
+    try{
+        const user = await userRepo.findById(req.user.id);
+        if(!user){
+            return res.status(404).json({message:"User not found"});
+        }
+        res.json({user});
+    }catch(error){
+        res.status(500).json({message:error.message});
+    }
+}
+
+module.exports = {registration,login,forgotPassword,resetPassword,me}
