@@ -19,7 +19,7 @@ const Parcel = require('../models/Parcel.js');
         return Parcel.find().sort({createdAt:-1}).populate("userId","name email");
     }
     const update = async(_id,data)=>{
-        return Parcel.findByIdAndUpdate(_id,data,{new:true});
+        return Parcel.findByIdAndUpdate(_id,data,{new:true, runValidators:true});
     }
     const remove = async(_id)=>{
         return Parcel.findByIdAndDelete(_id);

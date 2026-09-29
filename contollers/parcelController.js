@@ -9,7 +9,7 @@ const parcelRepo = require('../repository/parcelRepository.js');
 //create parcel
 const createParcel = async(req,res)=>{
     try{
-        const{title,address,weight} = req.body;
+        const{title,address,weight,pickupAddress,receiverName,receiverPhone} = req.body;
         //owner always comes from the token, never from the body
         const userId = req.user.id;
         //check existing parcel
@@ -21,7 +21,7 @@ const createParcel = async(req,res)=>{
         }
 
         //create parcel
-       const parcel = await parcelRepo.create({title,address,userId,weight});
+       const parcel = await parcelRepo.create({title,address,userId,weight,pickupAddress,receiverName,receiverPhone});
        res.status(201).json({
         message:"Parcel created successfully",parcel
        });
@@ -64,16 +64,21 @@ const findOwnedParcel = async(req,res)=>{
         res.status(403).json({message:"no permissions"});
         return null;
     }
+    //customers can only change a parcel before it is picked up
+    if(req.user.role !== "admin" && parcel.status !== "pending"){
+        res.status(400).json({message:"Parcel can only be changed while it is pending"});
+        return null;
+    }
     return parcel;
 }
 
 //parcel update
 const updateParcels = async(req,res)=>{
    try{
-    const {title,address,weight} = req.body;
+    const {title,address,weight,pickupAddress,receiverName,receiverPhone} = req.body;
     const id = req.params.id;
     if(!await findOwnedParcel(req,res)) return;
-    const parcel = await parcelRepo.update(id,{title,address,weight});
+    const parcel = await parcelRepo.update(id,{title,address,weight,pickupAddress,receiverName,receiverPhone});
     res.status(200).json({message:"Parcel updated successfully",parcel});
    }catch(error){
     res.status(400).json({
