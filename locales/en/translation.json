@@ -1,0 +1,6 @@
+{
+  "no_token": "No token provided",
+  "invalid_token": "Invalid token",
+  "no_permission": "You do not have permission",
+  "login_success": "Login successful"
+}

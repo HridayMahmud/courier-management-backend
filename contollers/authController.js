@@ -2,9 +2,9 @@ const userRepo = require('../repository/userRepository.js');
 require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const {Resend} = require('resend');
+//Resend is not used (Nodemailer sends mail), creating it without RESEND_API_KEY crashed the server
 const mailTransport = require('../config/mail.js');
-const resend = new Resend(process.env.RESEND_API_KEY);
+// const resend = new Resend(process.env.RESEND_API_KEY);
 const crypto = require('crypto');
 const { waitForDebugger } = require('inspector');
 
@@ -30,7 +30,7 @@ const registration = async(req,res)=>{
             name,email,password:hash,role
         });
         
-        res.json({
+        res.status(201).json({
             message:"user regitered successfully",User
         });
         
@@ -54,7 +54,7 @@ const login = async(req,res)=>{
         }
         const match = await bcrypt.compare(password,user.password);
         if(!match){
-            return res.status(403).json({
+            return res.status(401).json({
                 message:"Wrong Password"
             });
         }
@@ -62,7 +62,7 @@ const login = async(req,res)=>{
         res.status(200).json({user:user.role,token,message:req.t("login_success")});
     }
     catch(error){
-        return res.status(403).json({message:error.message});
+        return res.status(500).json({message:error.message});
     }
 }
 
@@ -110,7 +110,7 @@ const forgotPassword = async(req,res)=>{
             message:"email sent"
         })
     }catch(error){
-        res.status(403).json({
+        res.status(500).json({
             message:error.message
         });
     }

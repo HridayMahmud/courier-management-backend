@@ -9,10 +9,12 @@ const parcelRepo = require('../repository/parcelRepository.js');
 //create parcel
 const createParcel = async(req,res)=>{
     try{
-        const{title,address,userId,weight} = req.body;
+        const{title,address,weight} = req.body;
+        //owner always comes from the token, never from the body
+        const userId = req.user.id;
         //check existing parcel
-        const existingParcel = await parcelRepo.getUser(userId);
-        if(existingParcel && existingParcel.title===title && existingParcel.address===address){
+        const existingParcel = await parcelRepo.findDuplicate(userId,title,address);
+        if(existingParcel){
             return res.status(400).json({
             message: "Parcel already exists. Cannot create duplicate."
       });
@@ -20,11 +22,11 @@ const createParcel = async(req,res)=>{
 
         //create parcel
        const parcel = await parcelRepo.create({title,address,userId,weight});
-       res.status(200).json({
-        message:`parcel is successfully created , info:${parcel}`
+       res.status(201).json({
+        message:"Parcel created successfully",parcel
        });
     }catch(error){
-        res.status(401).json({
+        res.status(400).json({
             message:error.message
         });
     }
@@ -33,14 +35,22 @@ const createParcel = async(req,res)=>{
 //get myParcel
 
 const getMyParcel = async(req,res)=>{
-    const parcel = await parcelRepo.getUser(req.user.id);
-    res.json(parcel);
+    try{
+        const parcel = await parcelRepo.getUser(req.user.id);
+        res.json(parcel);
+    }catch(error){
+        res.status(500).json({message:error.message});
+    }
 }
 
 //get all parcels
 const getAllParcels = async(req,res)=>{
-    const parcel = await parcelRepo.getAll();
-    res.json(parcel);
+    try{
+        const parcel = await parcelRepo.getAll();
+        res.json(parcel);
+    }catch(error){
+        res.status(500).json({message:error.message});
+    }
 }
 
 //only the parcel owner or an admin can change a parcel
