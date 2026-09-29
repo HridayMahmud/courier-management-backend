@@ -113,6 +113,12 @@ Copy code
 npm start
 Server will run on http://localhost:4000 (or the port in your .env).
 
+Upgrading an existing database (parcels created before tracking ids): run once, check with `--dry-run` first.
+
+bash
+node scripts/backfill-tracking-ids.js --dry-run
+node scripts/backfill-tracking-ids.js
+
 🔹 API Endpoints
 1️⃣ Register User
 POST /register
