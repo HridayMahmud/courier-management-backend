@@ -8,6 +8,9 @@ const Parcel = require('../models/Parcel.js');
     const getUser = async(userId)=>{
         return Parcel.findOne({userId});
     }
+    const getById = async(_id)=>{
+        return Parcel.findById(_id);
+    }
     const getAll = async()=>{
         return Parcel.find();
     }
@@ -21,4 +24,4 @@ const Parcel = require('../models/Parcel.js');
     // getAll:()=>Parcel.find(),
     // update:(id,data)=>Parcel.findByIdAndUpdate(id,data,{new:true}),
     // remove:(id)=>Parcel.findByIdAndDelete(id)
-    module.exports = {create,getUser,getAll,update,remove}
+    module.exports = {create,getUser,getById,getAll,update,remove}

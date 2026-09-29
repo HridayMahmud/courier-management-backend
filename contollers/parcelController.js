@@ -43,11 +43,26 @@ const getAllParcels = async(req,res)=>{
     res.json(parcel);
 }
 
+//only the parcel owner or an admin can change a parcel
+const findOwnedParcel = async(req,res)=>{
+    const parcel = await parcelRepo.getById(req.params.id);
+    if(!parcel){
+        res.status(404).json({message:"Parcel not found"});
+        return null;
+    }
+    if(req.user.role !== "admin" && String(parcel.userId) !== String(req.user.id)){
+        res.status(403).json({message:"no permissions"});
+        return null;
+    }
+    return parcel;
+}
+
 //parcel update
 const updateParcels = async(req,res)=>{
    try{
     const {title,address,weight} = req.body;
     const id = req.params.id;
+    if(!await findOwnedParcel(req,res)) return;
     const parcel = await parcelRepo.update(id,{title,address,weight});
     res.status(200).json({message:"Parcel updated successfully",parcel});
    }catch(error){
@@ -61,6 +76,7 @@ const updateParcels = async(req,res)=>{
 const deleteParcels = async(req,res)=>{
     try{
         const id = req.params.id;
+        if(!await findOwnedParcel(req,res)) return;
         const parcel = await parcelRepo.remove(id);
         res.status(200).json({message:"parcel deleted successfully"});
     }catch(error){

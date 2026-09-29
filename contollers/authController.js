@@ -8,10 +8,15 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const crypto = require('crypto');
 const { waitForDebugger } = require('inspector');
 
+const RESET_TOKEN_TTL_MS = 15 * 60 * 1000;
+const hashToken = (token)=>crypto.createHash("sha256").update(String(token)).digest("hex");
+
 //user registration
 const registration = async(req,res)=>{
     try{
-        const{name,email,password,role} = req.body;
+        //public registration always creates a customer, admin creates couriers
+        const{name,email,password} = req.body;
+        const role = "customer";
         const exist = await userRepo.findUser(email);
         if(exist){
             return res.status(400).json({
@@ -75,14 +80,18 @@ const forgotPassword = async(req,res)=>{
         }
          const token = crypto.randomBytes(20).toString("hex");
         // const resetToken = Math.floor(100000 + Math.random()* 900000).toString();
-        //Save resetToken to your database
+        //Save hashed resetToken with 15 minute expiry, raw token only goes to the email
         // await userRepo.saveResetToken(email,resetToken);
-        await userRepo.update(user._id,{resetToken : token});
+        await userRepo.update(user._id,{
+            resetToken : hashToken(token),
+            resetTokenExpires : new Date(Date.now() + RESET_TOKEN_TTL_MS)
+        });
         // const resetLink = `http://localhost:${5000}/reset-password?email=${encodeURIComponent(user.email)}&token=${token}`
         await mailTransport.sendMail({
             to:user.email,
             subject:"password reset",
             html:`<p>please collect your reset token:${token}</p>
+            <p>It will expire within 15 minutes</p>
             `
         });
         //send mail to user to reset password
@@ -128,9 +137,14 @@ const resetPassword = async (req, res) => {
     if (!user.resetToken) {
       return res.status(400).json({ message: "No reset request found" });
     }
-      if(user.resetToken !== token){
+      if(user.resetToken !== hashToken(token)){
         return res.status(403).json({
             message:"Invalid token"
+        });
+      }
+      if(!user.resetTokenExpires || user.resetTokenExpires < new Date()){
+        return res.status(400).json({
+            message:"Token expired, please request a new one"
         });
       }
     // Hash new password
@@ -139,7 +153,8 @@ const resetPassword = async (req, res) => {
     // Update password and remove token
     await userRepo.update(user._id, {
       password: hashedPassword,
-      resetToken: null
+      resetToken: null,
+      resetTokenExpires: null
     });
     res.json({ message: "Password reset successful" });
     
