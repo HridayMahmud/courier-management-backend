@@ -105,6 +105,10 @@ To send real emails, set `EMAIL_USER` to a Gmail address and `EMAIL_PASS` to a G
 
 Customers sign up on the website. Couriers are created by an admin (Admin → Couriers). Admins are created with `npm run seed`.
 
+Rate limits (per IP): login 10 per 15 min, register 10 per hour, forgot/reset password 5 per 15 min. Over the limit the API answers 429. `RATE_LIMIT=off` in .env disables them (handy for local testing; keep them on in production).
+
+Tests: `npm test` starts a throwaway database and server and runs every file in `tests/` (no .env needed, your data is not touched).
+
 Upgrading an existing database (data from before tracking ids): run `npm run migrate -- --dry-run` to preview, then `npm run migrate` once.
 Besides parcels, it also lowercases stored emails (logins are case-insensitive now).
 
@@ -226,6 +230,8 @@ All paths start with `/api`. 🔒 = needs `Authorization: Bearer <token>`.
 | Method | Path | Who | What |
 |---|---|---|---|
 | GET | /auth/me 🔒 | any user | Logged-in user's profile |
+| PATCH | /auth/me 🔒 | any user | Body `{ "name" }` changes the display name |
+| PATCH | /auth/password 🔒 | any user | Body `{ "currentPassword", "newPassword" }` (min 6 characters) |
 | GET | /parcel/track/:trackingId | public | Status + timeline (no addresses, names or phone) |
 | GET | /parcel/:id 🔒 | owner, admin, assigned courier | Parcel details |
 | PATCH | /parcel/:id/status 🔒 | admin, assigned courier | Body `{ "status": "in_transit", "note": "..." }`. Couriers can only move forward |

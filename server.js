@@ -10,7 +10,8 @@ const db_connection = require('./config/db.js');
 const { i18nMiddleware, i18next } = require('./i18n/i18n.js');
 const cors = require('cors');
 const app = express();
-
+//Render sits in front of the app as one proxy; this lets rate limits see the real client IP
+app.set('trust proxy', 1);
 
 //middleware to parse json
 app.use(cors());
