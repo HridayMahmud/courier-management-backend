@@ -12,8 +12,9 @@ const User = require('../models/User.js');
 const create = async(data)=>{
     return User.create(data);
 }
+const normalizeEmail = (email)=>String(email ?? "").trim().toLowerCase();
 const findUser = async(email)=>{
-    return User.findOne({email});
+    return User.findOne({email:normalizeEmail(email)});
 }
 const update = async(id,data)=>{
 
@@ -28,4 +29,15 @@ const saveResetToken = async (email, token) => {
     );
 };
 
-module.exports = {create,findUser,update,saveResetToken}
+const findById = async(id)=>{
+    return User.findById(id);
+}
+//list users, optionally only one role, newest first
+const list = async(role)=>{
+    return User.find(role ? {role} : {}).sort({createdAt:-1});
+}
+const countByRole = async()=>{
+    return User.aggregate([{$group:{_id:"$role",count:{$sum:1}}}]);
+}
+
+module.exports = {create,findUser,update,saveResetToken,findById,list,countByRole}

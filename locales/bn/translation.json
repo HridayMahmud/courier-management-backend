@@ -1,0 +1,6 @@
+{
+  "no_token": "টোকেন পাওয়া যায়নি",
+  "invalid_token": "ভুল টোকেন",
+  "no_permission": "আপনার অনুমতি নেই",
+  "login_success": "লগইন সফল"
+}
