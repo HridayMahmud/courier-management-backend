@@ -176,4 +176,49 @@ const me = async(req,res)=>{
     }
 }
 
-module.exports = {registration,login,forgotPassword,resetPassword,me}
+//logged-in user changes their display name
+const updateMe = async(req,res)=>{
+    try{
+        const name = String(req.body?.name ?? "").trim();
+        if(name.length < 2){
+            return res.status(400).json({message:"Name must be at least 2 characters"});
+        }
+        const user = await userRepo.update(req.user.id,{name});
+        if(!user){
+            return res.status(404).json({message:"User not found"});
+        }
+        res.json({message:"Profile updated",user});
+    }catch(error){
+        res.status(500).json({message:error.message});
+    }
+}
+
+//logged-in user changes their password; the current password is required
+const changePassword = async(req,res)=>{
+    try{
+        const {currentPassword,newPassword} = req.body || {};
+        if(!currentPassword || !newPassword){
+            return res.status(400).json({message:"Current and new password are required"});
+        }
+        if(String(newPassword).length < 6){
+            return res.status(400).json({message:"New password must be at least 6 characters"});
+        }
+        const user = await userRepo.findById(req.user.id);
+        if(!user){
+            return res.status(404).json({message:"User not found"});
+        }
+        if(!await bcrypt.compare(String(currentPassword),user.password)){
+            return res.status(400).json({message:"Current password is incorrect"});
+        }
+        if(currentPassword === newPassword){
+            return res.status(400).json({message:"New password must be different from the current one"});
+        }
+        //also drop any pending reset code, it belonged to the old password
+        await userRepo.update(user._id,{password:await bcrypt.hash(String(newPassword),10), resetToken:null, resetTokenExpires:null});
+        res.json({message:"Password changed successfully"});
+    }catch(error){
+        res.status(500).json({message:error.message});
+    }
+}
+
+module.exports = {registration,login,forgotPassword,resetPassword,me,updateMe,changePassword}
