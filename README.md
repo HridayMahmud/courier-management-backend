@@ -100,8 +100,8 @@ Admin can view and manage all parcels
 
 If a required variable is missing, the server stops and tells you which one.
 
-Email ("forgot password"): without `EMAIL_USER` / `EMAIL_PASS` nothing is sent. The reset email, including the code, is printed in the server terminal.
-To send real emails, set `EMAIL_USER` to a Gmail address and `EMAIL_PASS` to a Gmail App Password.
+Email ("forgot password"): without mail settings nothing is sent. The reset email, including the code, is printed in the server terminal.
+To send real emails, either set `BREVO_API_KEY` + `EMAIL_FROM` (Brevo HTTP API; use this on Render's free plan, which blocks SMTP), or `EMAIL_USER` + `EMAIL_PASS` (Gmail App Password). A mail service that doesn't answer fails after 10 seconds with a readable message.
 
 Customers sign up on the website. Couriers are created by an admin (Admin → Couriers). Admins are created with `npm run seed`.
 

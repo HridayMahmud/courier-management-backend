@@ -87,13 +87,22 @@ const forgotPassword = async(req,res)=>{
             resetTokenExpires : new Date(Date.now() + RESET_TOKEN_TTL_MS)
         });
         // const resetLink = `http://localhost:${5000}/reset-password?email=${encodeURIComponent(user.email)}&token=${token}`
-        await mailTransport.sendMail({
-            to:user.email,
-            subject:"password reset",
-            html:`<p>please collect your reset token:${token}</p>
-            <p>It will expire within 15 minutes</p>
-            `
-        });
+        try{
+            await mailTransport.sendMail({
+                to:user.email,
+                subject:"Your password reset code",
+                html:`<p>Hi ${user.name},</p>
+                <p>Use this code to reset your password. Your reset token: <b style="font-family:monospace">${token}</b></p>
+                <p>It will expire within 15 minutes. If you didn't ask for this, you can ignore this email.</p>
+                `
+            });
+        }catch(mailError){
+            //keep the real cause in the server log, give the user something readable
+            console.error(`reset email to ${user.email} failed: ${mailError.message}`);
+            return res.status(502).json({
+                message:"We couldn't send the email right now. Please try again in a few minutes."
+            });
+        }
         //send mail to user to reset password
     //   const result =  await resend.emails.send({
     //         from: "Courier App <onboarding@resend.dev>",
