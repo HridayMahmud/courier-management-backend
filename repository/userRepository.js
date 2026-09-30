@@ -12,8 +12,9 @@ const User = require('../models/User.js');
 const create = async(data)=>{
     return User.create(data);
 }
+const normalizeEmail = (email)=>String(email ?? "").trim().toLowerCase();
 const findUser = async(email)=>{
-    return User.findOne({email});
+    return User.findOne({email:normalizeEmail(email)});
 }
 const update = async(id,data)=>{
 

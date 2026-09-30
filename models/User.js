@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const UserSchema = new mongoose.Schema({
   name:{type:String,required:true},
 
-  email:{type:String,unique:true},
+  //stored lowercase so Test@x.com and test@x.com are the same account
+  email:{type:String,unique:true,required:true,lowercase:true,trim:true},
 
   password:{type:String,required:true},
 

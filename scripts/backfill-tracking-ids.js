@@ -5,7 +5,8 @@
 //
 //Parcels: adds trackingId, converts weight text ("2kg") to a number, sets a missing
 //status to pending and adds the first statusHistory entry.
-//Users: clears reset tokens saved by the old plain-text flow (they can't be used anymore).
+//Users: clears reset tokens saved by the old plain-text flow (they can't be used anymore)
+//and stores emails lowercase.
 require('dotenv').config();
 const mongoose = require('mongoose');
 const { STATUSES, generateTrackingId } = require('../models/Parcel.js');
@@ -68,7 +69,19 @@ const run = async()=>{
     const tokenCount = await users.countDocuments(oldTokens);
     if(!DRY_RUN && tokenCount) await users.updateMany(oldTokens,{$set:{resetToken:null, resetTokenExpires:null}});
 
+    //emails are now stored lowercase; lowercase old ones unless that would clash with another account
+    let lowered = 0;
+    const clashes = [];
+    for await (const user of users.find({email:{$regex:/[A-Z]|^\s|\s$/}})){
+        const email = user.email.trim().toLowerCase();
+        if(await users.findOne({email, _id:{$ne:user._id}})){ clashes.push(user.email); continue; }
+        lowered++;
+        if(!DRY_RUN) await users.updateOne({_id:user._id},{$set:{email}});
+    }
+
     console.log(`${DRY_RUN ? "[dry run] would update" : "updated"} ${updated} parcel(s)`);
+    console.log(`${DRY_RUN ? "[dry run] would lowercase" : "lowercased"} ${lowered} email(s)`);
+    if(clashes.length) console.log(`emails that differ only by letter case, please merge by hand: ${clashes.join(", ")}`);
     if(badWeight) console.log(`${badWeight} parcel(s) had a weight that is not a number, it was removed`);
     if(unknownStatus.length) console.log(`parcels with an unknown status, please fix by hand: ${unknownStatus.join(", ")}`);
     console.log(`${DRY_RUN ? "[dry run] would clear" : "cleared"} ${tokenCount} old reset token(s)`);
