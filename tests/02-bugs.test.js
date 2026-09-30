@@ -51,7 +51,7 @@ const fs = require('fs');
   check('forgot-password -> 200 (console mail)', r.status === 200 && r.data.message === 'email sent', r);
   await new Promise((s) => setTimeout(s, 500));
   const log = fs.readFileSync(process.env.TEST_SERVER_LOG, 'utf8');
-  const m = log.match(/[email not sent, MAIL_TRANSPORT=console][sS]*?reset token:s*([a-f0-9]{40})/);
+  const m = log.match(/\[email not sent, MAIL_TRANSPORT=console\][\s\S]*?reset token:\s*([a-f0-9]{40})/);
   check('reset email printed in server terminal', !!m, log.slice(-500));
 
   await done();
