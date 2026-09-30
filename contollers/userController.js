@@ -45,4 +45,29 @@ const createCourier = async(req,res)=>{
     }
 }
 
-module.exports = {listUsers,createCourier}
+//admin: set a new password for a customer or courier who forgot theirs (used when email is off)
+const resetUserPassword = async(req,res)=>{
+    try{
+        const {email,newPassword} = req.body || {};
+        if(!email || !newPassword){
+            return res.status(400).json({message:"Email and new password are required"});
+        }
+        if(String(newPassword).length < 6){
+            return res.status(400).json({message:"Password must be at least 6 characters"});
+        }
+        const user = await userRepo.findUser(email);
+        if(!user){
+            return res.status(404).json({message:"No account with this email"});
+        }
+        //admins change their own password in Account settings, never someone else's admin account
+        if(user.role === "admin"){
+            return res.status(403).json({message:"Admin passwords can only be changed by that admin in Account settings"});
+        }
+        await userRepo.update(user._id,{password:await bcrypt.hash(String(newPassword),10), resetToken:null, resetTokenExpires:null});
+        res.json({message:`Password updated for ${user.email}`, user:{name:user.name,email:user.email,role:user.role}});
+    }catch(error){
+        res.status(500).json({message:error.message});
+    }
+}
+
+module.exports = {listUsers,createCourier,resetUserPassword}

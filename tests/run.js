@@ -24,7 +24,7 @@ async function startServer(env) {
   const out = fs.openSync(LOG, 'a');
   const child = spawn(process.execPath, ['server.js'], {
     cwd: ROOT,
-    env: { ...process.env, ...env, PORT: String(port), NODE_ENV: 'test', MAIL_TRANSPORT: 'console' },
+    env: { ...process.env, MAIL_TRANSPORT: 'console', ...env, PORT: String(port), NODE_ENV: 'test' },
     stdio: ['ignore', out, out],
   });
   const url = `http://127.0.0.1:${port}`;
@@ -54,21 +54,25 @@ function runFile(file, env) {
   const totals = { passed: 0, failed: 0 };
   let server;
   try {
-    // everything except the rate-limit file runs with limits off
-    server = await startServer({ ...base, RATE_LIMIT: 'off' });
-    const env = { TEST_BASE_URL: server.url, TEST_MONGO_URI: MONGODB_URI, TEST_SERVER_LOG: LOG };
-    for (const f of files.filter((f) => !f.includes('rate-limit'))) {
-      const r = runFile(f, env);
-      totals.passed += r.passed;
-      totals.failed += r.failed;
-    }
-    server.child.kill();
-
-    server = await startServer({ ...base, RATE_LIMIT: 'on' });
-    for (const f of files.filter((f) => f.includes('rate-limit'))) {
-      const r = runFile(f, { ...env, TEST_BASE_URL: server.url });
-      totals.passed += r.passed;
-      totals.failed += r.failed;
+    // each group gets its own server: most files run with rate limits off and console email,
+    // files named *rate-limit* with limits on, files named *mail-off* with email switched off
+    const groups = [
+      { match: (f) => !f.includes('rate-limit') && !f.includes('mail-off'), env: { RATE_LIMIT: 'off' } },
+      { match: (f) => f.includes('rate-limit'), env: { RATE_LIMIT: 'on' } },
+      { match: (f) => f.includes('mail-off'), env: { RATE_LIMIT: 'off', MAIL_TRANSPORT: 'off' } },
+    ];
+    for (const group of groups) {
+      const groupFiles = files.filter(group.match);
+      if (!groupFiles.length) continue;
+      server = await startServer({ ...base, ...group.env });
+      const env = { TEST_BASE_URL: server.url, TEST_MONGO_URI: MONGODB_URI, TEST_SERVER_LOG: LOG };
+      for (const f of groupFiles) {
+        const r = runFile(f, env);
+        totals.passed += r.passed;
+        totals.failed += r.failed;
+      }
+      server.child.kill();
+      server = null;
     }
   } finally {
     server?.child.kill();

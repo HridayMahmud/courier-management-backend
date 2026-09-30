@@ -102,6 +102,7 @@ If a required variable is missing, the server stops and tells you which one.
 
 Email ("forgot password"): without mail settings nothing is sent. The reset email, including the code, is printed in the server terminal.
 To send real emails, either set `BREVO_API_KEY` + `EMAIL_FROM` (Brevo HTTP API; use this on Render's free plan, which blocks SMTP), or `EMAIL_USER` + `EMAIL_PASS` (Gmail App Password). A mail service that doesn't answer fails after 10 seconds with a readable message.
+No email service? Set `MAIL_TRANSPORT=off`: "forgot password" then tells users to contact the admin, and the admin sets a new password (Admin → Couriers → Reset a password).
 
 Customers sign up on the website. Couriers are created by an admin (Admin → Couriers). Admins are created with `npm run seed`.
 
@@ -242,6 +243,7 @@ All paths start with `/api`. 🔒 = needs `Authorization: Bearer <token>`.
 | GET | /parcel/getall-parcels?page=1&limit=10&status=&search= 🔒 | admin | Paginated `{ items, total, page, limit, pages }`. Without query params the plain array is returned as before |
 | GET | /users?role=courier 🔒 | admin | User list (couriers include `activeParcels`) |
 | POST | /users/courier 🔒 | admin | Body `{ "name", "email", "password" }` creates a courier |
+| PATCH | /users/password 🔒 | admin | Body `{ "email", "newPassword" }` sets a new password for a customer or courier (not for admins) |
 
 Parcel fields: `trackingId` (auto, e.g. `SS-8F3K2Q9P`), `title`, `address` (delivery), `pickupAddress`, `receiverName`, `receiverPhone`, `weight` (number, kg), `status`, `statusHistory`, `assignedCourier`.
 Status flow: `pending → picked_up → in_transit → out_for_delivery → delivered`, or `cancelled`.

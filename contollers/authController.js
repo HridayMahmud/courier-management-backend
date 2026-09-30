@@ -71,6 +71,12 @@ const login = async(req,res)=>{
 //forgot password
 const forgotPassword = async(req,res)=>{
     try{
+        //email is switched off: say so up front (and don't reveal whether the account exists)
+        if(mailTransport.transport === "off"){
+            return res.status(503).json({
+                message:"Password reset by email is not available. Please contact the admin to get a new password."
+            });
+        }
         const { email }= req.body;
         const user = await userRepo.findUser(email);
         if(!user){

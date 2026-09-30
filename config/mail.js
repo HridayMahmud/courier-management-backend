@@ -6,6 +6,7 @@ require('dotenv').config();
 //  gmail    real emails through Gmail SMTP, needs EMAIL_USER and EMAIL_PASS
 //  console  nothing is sent, the email is printed in the server terminal (local development)
 //  ethereal fake inbox for testing, no account needed, logs a preview link per email
+//  off      email is turned off: "forgot password" tells users to contact the admin
 //Left empty: brevo when BREVO_API_KEY is set, else gmail when EMAIL_USER and EMAIL_PASS are set, else console.
 const pickTransport = ()=>{
     if(process.env.MAIL_TRANSPORT) return process.env.MAIL_TRANSPORT.toLowerCase();
@@ -55,7 +56,9 @@ let transporter = null;
 
 const getTransporter = async()=>{
     if(transporter) return transporter;
-    if(MAIL_TRANSPORT === "brevo"){
+    if(MAIL_TRANSPORT === "off"){
+        transporter = {sendMail: async()=>{ throw new Error("Email is turned off (MAIL_TRANSPORT=off)"); }};
+    }else if(MAIL_TRANSPORT === "brevo"){
         transporter = brevoTransport;
     }else if(MAIL_TRANSPORT === "console"){
         transporter = {
