@@ -86,38 +86,27 @@ Create, view, update, and delete parcels
 
 Admin can view and manage all parcels
 
-🔹 Setup Instructions
-Clone the repository:
+🔹 Quick Start (local)
 
-bash
-git clone https://github.com/HridayMahmud/courier-management-backend.git
-cd courier-management-backend
-Install dependencies:
+1. Install: `git clone https://github.com/HridayMahmud/courier-management-backend.git`, then `cd courier-management-backend` and `npm install`
+2. Create a free database: MongoDB Atlas → create a free cluster → Database Access: add a user → Network Access: allow your IP (or 0.0.0.0/0) → Connect → Drivers → copy the connection string.
+3. `cp .env.example .env` and fill in:
+   - `MONGODB_URI`: the Atlas connection string (put the database name before `?`, e.g. `.../courier?retryWrites=true`)
+   - `JWT_SECRET`: any long random text
+   - `ADMIN_EMAIL` / `ADMIN_PASSWORD`: your first admin login
+4. Create the admin: `npm run seed`
+   (or `npm run seed:demo` for the admin plus demo accounts and sample parcels; never used when `NODE_ENV=production`)
+5. Start: `npm run dev` (or `npm start`). The API runs on http://localhost:4000.
 
-bash
-npm install
-Create .env based on .env.example:
+If a required variable is missing, the server stops and tells you which one.
 
-ini
-PORT=4000
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-EMAIL_USER=your_email@example.com
-EMAIL_PASS=your_email_password
-# optional: "gmail" (default) or "ethereal" (fake inbox for testing, prints a preview link)
-MAIL_TRANSPORT=gmail
-Start the server:
+Email ("forgot password"): without `EMAIL_USER` / `EMAIL_PASS` nothing is sent. The reset email, including the code, is printed in the server terminal.
+To send real emails, set `EMAIL_USER` to a Gmail address and `EMAIL_PASS` to a Gmail App Password.
 
-bash
-Copy code
-npm start
-Server will run on http://localhost:4000 (or the port in your .env).
+Customers sign up on the website. Couriers are created by an admin (Admin → Couriers). Admins are created with `npm run seed`.
 
-Upgrading an existing database (parcels created before tracking ids): run once, check with `--dry-run` first.
-
-bash
-node scripts/backfill-tracking-ids.js --dry-run
-node scripts/backfill-tracking-ids.js
+Upgrading an existing database (data from before tracking ids): run `npm run migrate -- --dry-run` to preview, then `npm run migrate` once.
+Besides parcels, it also lowercases stored emails (logins are case-insensitive now).
 
 🔹 API Endpoints
 1️⃣ Register User

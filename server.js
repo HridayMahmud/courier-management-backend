@@ -1,3 +1,7 @@
+require('dotenv').config();
+const { checkEnv } = require('./config/env.js');
+checkEnv();
+
 const express = require('express');
 const userRoutes = require('./routes/authRouter.js');
 const parcelRoutes = require('./routes/parcelsRouter.js');
@@ -6,7 +10,6 @@ const db_connection = require('./config/db.js');
 const { i18nMiddleware, i18next } = require('./i18n/i18n.js');
 const cors = require('cors');
 const app = express();
-require('dotenv').config();
 
 
 //middleware to parse json
