@@ -59,6 +59,9 @@ const SEND = `require('./config/mail.js').sendMail({ to: 'receiver@test.com', su
   out = await sendWith({}, `console.log('transport=' + require('./config/mail.js').transport)`);
   check('without any mail settings the transport is console', out.includes('transport=console'), out);
 
+  out = await sendWith({ MAIL_TRANSPORT: 'off' }, SEND + "console.log('transport=' + require('./config/mail.js').transport);");
+  check('MAIL_TRANSPORT=off refuses to send', /FAILED Email is turned off/.test(out) && out.includes('transport=off'), out);
+
   server.close();
   await done();
 })().catch((e) => {
